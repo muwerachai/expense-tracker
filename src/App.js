@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+import { validateTransaction } from './services/validator';
 import TransactionItem from './components/TransactionItem';
+import { createClasses } from './services/classService';
 
 
 const initialTransactions = [
@@ -41,21 +43,58 @@ const [category, setCategory] = useState('Food');
 const [amount, setAmount] = useState('');
 const [date, setDate] = useState('');
 const [type, setType] = useState('Expense');
-const [isShowCreateForm, setisShowCreateForm] = useState(false);
+const [isShowCreateForm, setIsShowCreateForm] = useState(false);
+const [error,setError] = useState({});
+
+const handleSubmitForm = event => {
+  event.preventDefault()
+
+  // always validate form data
+  const transactionError = validateTransaction({
+    payee,
+    amount,
+    date
+  });
+
+  if (transactionError) {
+    return setError(transactionError);
+  } 
+
+  const newTransaction = {
+    payee,
+    amount,
+    date,
+    type,
+    category,
+    id: uuidv4()
+  };
+
+  const newTransactions = [...transactions, newTransaction];
+  newTransactions.sort((a, b) => (b.date > a.date ? 1 : -1));
+  setTransactions(newTransactions);
+  setIsShowCreateForm(false);
+  setError({});
+  setPayee('');
+  setAmount('');
+  setDate('');
+  setType('Expense');
+  setCategory(expenses[0]);
+};
+
   return (
     <div className="container" style={{ maxWidth: 768 }}>
       {!isShowCreateForm ? (
       <div className="my-3">
         <button 
         className="btn btn-outline-warning w-100" 
-        onClick={() => setisShowCreateForm(true)}
+        onClick={() => setIsShowCreateForm(true)}
         >
           Click here to create new transaction
         </button>
       </div>
       ) : (
       <div className="bg-white p-3 rounded-2 my-3">
-        <form className="row g-3">
+        <form className="row g-3" onSubmit={handleSubmitForm}>
           {/* ********** Begin Radio Button: Expense or Income ********** */}
           <div className="col-12">
             <div className="btn-group">
@@ -95,7 +134,18 @@ const [isShowCreateForm, setisShowCreateForm] = useState(false);
           {/* ********** Begin Input: Payee ********** */}
           <div className="col-sm-6">
             <label className="form-label">Payee</label>
-            <input type="text" className="form-control" value={payee} onChange={event => setPayee(event.target.value)}/>
+            <input
+               type="text" 
+               className={createClasses(
+                'form-control',
+                error.payee ? 'is-invalid' : ''
+              )}
+               value={payee} 
+               onChange={event => setPayee(event.target.value)}
+               />
+               {error.payee && (
+                <div className='invalid-feedback'>{error.payee}</div>
+               )}   
           </div>
           {/* ********** End Input: Payee ********** */}
 
@@ -124,15 +174,37 @@ const [isShowCreateForm, setisShowCreateForm] = useState(false);
           {/* ********** Begin Input: Amount ********** */}
           <div className="col-sm-6">
             <label className="form-label">Amount</label>
-            <input type="text" className="form-control" value={amount} onChange={event => setAmount(event.target.value)}/>
-          </div>
+            <input 
+              type="text" 
+              className={createClasses(
+                'form-control',
+                error.amount ? 'is-invalid' : ''
+              )}
+              value={amount}
+              onChange={event => setAmount(event.target.value)}
+            />
+            {error.amount && (
+              <div className="invalid-feedback">{error.amount}</div>
+            )} 
+            </div>
           {/* ********** End Input: Amount ********** */}
 
           {/* ********** Begin Input: Date ********** */}
           <div className="col-sm-6">
             <label className="form-label">Date</label>
-            <input type="date" className="form-control" value={date} onChange={event => setDate(event.target.value)}/>
-          </div>
+            <input
+              type="date" 
+              className={createClasses(
+                'form-control',
+                error.date ? 'is-invalid' : ''
+              )}
+              value={date}
+              onChange={event => setAmount(event.target.value)} 
+              />
+              {error.date && (
+                <div className="invalid-feedback">{error.date}</div>
+              )}
+            </div>
           {/* ********** End Input: Date ********** */}
 
           {/* ********** Begin Form Button ********** */}
@@ -142,7 +214,7 @@ const [isShowCreateForm, setisShowCreateForm] = useState(false);
               <button 
                 type='button'
                 className="btn btn-outline-secondary" 
-                onClick={() => setisShowCreateForm(false)}
+                onClick={() => setIsShowCreateForm(false)}
                 >
                   Cancel
                   </button>
