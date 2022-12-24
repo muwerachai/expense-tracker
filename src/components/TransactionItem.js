@@ -15,6 +15,7 @@ function TransactionItem (props) {
       'list-group-item d-flex', 
       type === 'Expense' ? 'callout-danger' : 'callout-success'
       )}
+      onClick={() => props.openEditForm(props.transaction)}
     >          
     <div className="d-flex flex-grow-1 gap-4" role="button">
       <div
