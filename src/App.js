@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import TransactionItem from "./components/TransactionItem";
 
 const initialTransactions = [
   {
@@ -28,20 +29,6 @@ const initialTransactions = [
   }
 ];
 
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "July",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec"
-];
 function App() {
   const [transactions, setTransactions] = useState(initialTransactions);
   const [payee, setPayee] = useState("");
@@ -130,61 +117,7 @@ function App() {
       {/* ********** Begin Transaction List ********** */}
       <ul className="list-group my-3">
         {transactions.map((item) => (
-          <li
-            key={item.id}
-            className={`list-group-item d-flex callout-${
-              item.type === "Expense" ? "danger" : "success"
-            }`}
-          >
-            <div className="d-flex flex-grow-1 gap-4" role="button">
-              {/* ********** Begin Transaction Date #1 ********** */}
-              <div
-                className="border border-dark rounded-2 bg-warning p-2 text-center"
-                style={{ width: "3.75rem" }}
-              >
-                <p
-                  className="m-0 text-black-50"
-                  style={{ fontSize: "0.75rem" }}
-                >
-                  {/* {MONTHS[item.date.slice(5, 7) - 1]} {item.date.slice(2, 4)} */}
-                  {new Intl.DateTimeFormat("en-us", {
-                    year: "2-digit",
-                    month: "short"
-                  }).format(new Date(item.date))}
-                </p>
-                <p className="m-0">{item.date.slice(8)}</p>
-              </div>
-              {/* ********** End Transaction Date #1 ********** */}
-
-              <div className="d-flex align-items-center flex-grow-1">
-                {/* ********** Begin Transaction Detail #1 ********** */}
-                <div className="flex-grow-1">
-                  <p className="mb-1 fw-bold">{item.payee}</p>
-                  <p
-                    className="mb-0 text-black-50"
-                    style={{ fontSize: "0.75rem" }}
-                  >
-                    {item.category}
-                  </p>
-                </div>
-                {/* ********** End Transaction Detail #1 ********** */}
-
-                {/* ********** Begin Transaction Amount #1 ********** */}
-                <span
-                  className={`badge text-bg-${
-                    item.type === "Expense" ? "danger" : "success"
-                  }`}
-                >
-                  {new Intl.NumberFormat("en-us", {
-                    style: "currency",
-                    currency: "THB",
-                    currencyDisplay: "narrowSymbol"
-                  }).format(item.amount)}
-                </span>
-                {/* ********** End Transaction Amount #1 ********** */}
-              </div>
-            </div>
-          </li>
+          <TransactionItem key={item.id} transaction={item} />
         ))}
 
         {/* ********** End Transaction Item #1 ********** */}
