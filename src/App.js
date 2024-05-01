@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+
+import { validateTransaction } from "./services/validator";
 import TransactionItem from "./components/TransactionItem";
+import { createClasses } from "./services/classService";
 
 const initialTransactions = [
   {
@@ -40,7 +43,40 @@ function App() {
   const [date, setDate] = useState("");
   const [type, setType] = useState("Expense");
   const [isShowCreateForm, setIsShowCreateForm] = useState(false);
+  const [error, setError] = useState({});
 
+  const handleSubmitForm = (event) => {
+    event.preventDefault();
+    // always validate form data
+    const transactionError = validateTransaction({
+      payee,
+      amount,
+      date
+    });
+
+    if (transactionError) {
+      return setError(transactionError);
+    }
+    const newTransaction = {
+      payee,
+      amount,
+      date,
+      type,
+      category,
+      id: uuidv4()
+    };
+
+    const newTransactions = [...transactions, newTransaction];
+    newTransactions.sort((a, b) => (b.date > a.date ? 1 : -1));
+    setTransactions(newTransactions);
+    setIsShowCreateForm(false);
+    setError({});
+    setPayee("");
+    setAmount("");
+    setDate("");
+    setType("Expense");
+    setCategory(expenses[0]);
+  };
   return (
     <div className="container" style={{ maxWidth: 768 }}>
       {!isShowCreateForm ? (
@@ -54,7 +90,7 @@ function App() {
         </div>
       ) : (
         <div className="bg-white p-3 rounded-2 my-3">
-          <form className="row g-3">
+          <form className="row g-3" onSubmit={handleSubmitForm}>
             {/* ********** Begin Radio Button: Expense or Income ********** */}
             <div className="col-12">
               <div className="btn-group">
@@ -97,10 +133,16 @@ function App() {
               <label className="form-label">Payee</label>
               <input
                 type="text"
-                className="form-control"
+                className={createClasses(
+                  "form-control",
+                  error.payee ? "is-invalid" : ""
+                )}
                 value={payee}
                 onChange={(event) => setPayee(event.target.value)}
               />
+              {error.payee && (
+                <div className="invalid-feedback">{error.payee}</div>
+              )}
             </div>
             {/* ********** End Input: Payee ********** */}
 
@@ -132,10 +174,16 @@ function App() {
               <label className="form-label">Amount</label>
               <input
                 type="text"
-                className="form-control"
+                className={createClasses(
+                  "form-control",
+                  error.amount ? "is-invalid" : ""
+                )}
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
               />
+              {error.amount && (
+                <div className="invalid-feedback">{error.amount}</div>
+              )}
             </div>
             {/* ********** End Input: Amount ********** */}
 
